@@ -7,12 +7,7 @@ export default class App extends Component{
 constructor(props){
   super(props);
   this.state = {
-    tokenInput: '',
-    token: 'Carregando.....',
-    nomeInput: '',
-    nome: '',
-    idadeInput: '',
-    idade: ''
+    lista: []
   };
 
   this.cadastrar = this.cadastrar.bind(this);
@@ -35,12 +30,28 @@ constructor(props){
     // Initialize Firebase
    
 
-    firebase.database().ref('token').on('value', (snapshot) => {
-          let state = this.state; 
-          state.token = snapshot.val();
-          console.log(state);
-          this.setState(state);
-    });
+      firebase.database().ref('usuarios').on('value', (snapshot) => {
+                let state = this.state; 
+                state.lista = [];
+
+                snapshot.forEach((chilItem) => {
+                  state.lista.push({
+                    key: chilItem.key,
+                    nome: chilItem.val().nome,
+                    idade: chilItem.val().idade
+                  })
+                });
+
+                this.setState(state);
+
+              });
+
+    // firebase.database().ref('token').on('value', (snapshot) => {
+    //       let state = this.state; 
+    //       state.token = snapshot.val();
+    //       console.log(state);
+    //       this.setState(state);
+    // });
     
 
     // firebase.database().ref('usuarios').child('token').once('value').then((snapshot) => {
@@ -50,12 +61,12 @@ constructor(props){
     //     this.setState(state);
     // });
 
-    firebase.database().ref('usuarios').child(1).once('value').then((snapshot) => {
-      let state = this.state; 
-      state = snapshot.val();
-      console.log(state);
-      this.setState(state);
-  });
+  //   firebase.database().ref('usuarios').child(1).once('value').then((snapshot) => {
+  //     let state = this.state; 
+  //     state = snapshot.val();
+  //     console.log(state);
+  //     this.setState(state);
+  // });
 
 
 }
@@ -78,20 +89,18 @@ cadastrar(e){
 
   render(){
 
-    const { token, nome, idade } = this.state;
 
     return(
         <div>
-
-         <form onSubmit={this.cadastrar}>
-           <input type="text" value={this.state.idadeInput} onChange={(e) => this.setState({idadeInput: e.target.value}) } /><br />
-           <input type="text" value={this.state.nomeInput} onChange={(e) => this.setState({nomeInput: e.target.value}) } /><br />
-           <button type="submit">Cadastrar</button>
-         </form>
-
-          <h1>token: {token}</h1>
-          <h1>nome: {nome}</h1>
-          <h1>idade: {idade}</h1>
+          {this.state.lista.map((item) => {
+            return(
+              <div>
+                <h3>ID: {item.key}</h3>
+                <h1>Olá {item.nome}</h1>
+                <h2>Idade: {item.idade} anos</h2>
+              </div>
+            );
+          })}
         </div>
     );
   }
