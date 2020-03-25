@@ -8,14 +8,16 @@ export default class App extends Component{
 constructor(props){
   super(props);
   this.state = {
-    nome: '',
     email: '',
-    senha: ''
-
+    senha: '',
+    user: null
   };
   this.cadastrar = this.cadastrar.bind(this);
+  this.logar = this.logar.bind(this);
+  this.auth = this.auth.bind(this);
+  this.sair = this.sair.bind(this);
 
-  firebase.auth().signOut();
+  //firebase.auth().signOut();
 
   firebase.auth().onAuthStateChanged((user) => {
     if (user){
@@ -29,15 +31,40 @@ constructor(props){
 
 }
 
+componentDidMount(){
+  this.auth();
+}
 
-cadastrar(e){
+auth(){
+  firebase.auth().onAuthStateChanged((user) => {
+    if (user){
+      this.setState({user: user}); 
+    }
+  })
+}
 
+
+cadastrar(){
    firebase.auth().createUserWithEmailAndPassword(this.state.email, this.state.senha)
    .catch((error) => {
       alert('Codigo de error: ' + error.code);
-    })
+    });
+}
 
-   e.preventDefault();
+logar(){
+  firebase.auth().signInWithEmailAndPassword(this.state.email, this.state.senha)
+  .catch((error) => {
+     alert('Codigo de error: ' + error.code);
+   });
+}
+
+
+sair(){
+  firebase.auth().signOut()
+  .then(() => {
+    this.setState({user: null});
+    alert('Deslogado com sucesso!');
+  })
 }
 
 
@@ -45,19 +72,30 @@ cadastrar(e){
 
     return(
         <div>
-          <h1>Novo usuario</h1>
-          <form onSubmit={ (e)=> {this.cadastrar(e)} }>
-            <label>Nome: </label><br />
-            <input type="text" value={this.state.nome} onChange={(e) => this.setState({nome: e.target.value})} /><br />
-  
-            <label>Email: </label><br />
-            <input type="text" value={this.state.email} onChange={(e) => this.setState({email: e.target.value})} /><br />
-  
-            <label>Senha: </label><br />
-            <input type="text" value={this.state.senha} onChange={(e) => this.setState({senha: e.target.value})} /><br />
-  
-            <button type="submit">Cadastrar</button>
-          </form>
+
+          {this.state.user ? 
+            <div>
+                <p>Painel adim</p>
+                <p>Seja bem vindo :)</p>
+                <p>{this.state.email}</p>
+                <p>{this.state.uid}</p>
+                <button onClick={this.sair}>Sair</button>
+              </div> 
+              :
+              <div>
+              <h1>Seja bem vindo</h1>
+    
+              <label>Email: </label><br />
+              <input type="text" value={this.state.email} onChange={(e) => this.setState({email: e.target.value})} /><br />
+    
+              <label>Senha: </label><br />
+              <input type="text" value={this.state.senha} onChange={(e) => this.setState({senha: e.target.value})} /><br />
+    
+              <button onClick={this.cadastrar}>Cadastrar</button>
+              <button onClick={this.logar}>Login</button>
+            </div>
+
+          }
 
         </div>
     );
